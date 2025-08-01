@@ -1,4 +1,4 @@
-name: CI/CD - Build and Push Docker Image, Update YAML
+name: CI/CD - Build, Scan, Push Docker Image, Update YAML
 
 on:
   push:
@@ -6,14 +6,14 @@ on:
       - main
 
 permissions:
-  contents: write  # Required to push back changes
+  contents: write
 
 env:
   IMAGE_NAME: suchithra05/vote-app
 
 jobs:
   build:
-    name: Build and Push Docker Image
+    name: Build, Scan, and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
@@ -29,10 +29,20 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build and Push Docker Image
+      - name: Build Docker Image
         run: |
           docker build -t $IMAGE_NAME:${{ github.sha }} ./apps
-          docker push $IMAGE_NAME:${{ github.sha }}
+
+      - name: Scan Docker Image with Trivy
+        uses: aquasecurity/trivy-action@v0.13.1
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          format: table
+          exit-code: 1  # Fails pipeline if vulnerabilities found
+          severity: CRITICAL,HIGH
+
+      - name: Push Docker Image
+        run: docker push $IMAGE_NAME:${{ github.sha }}
 
   deploy:
     name: Update Kubernetes YAML
