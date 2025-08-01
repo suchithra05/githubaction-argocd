@@ -1,0 +1,43 @@
+name: CI - Build and Push Docker Image & Update YAML
+
+on:
+  push:
+    branches:
+      - main  
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: suchithra05/vote-app
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Build and push Docker image
+      run: |
+        docker build -t $IMAGE_NAME:${{ github.sha }} ./app
+        docker push $IMAGE_NAME:${{ github.sha }}
+
+    - name: Update image tag in flask-vote.yaml
+      run: |
+        sed -i "s|\(image: $IMAGE_NAME:\).*|\1${{ github.sha }}|" k8s-manifests/flask-vote.yaml
+
+    - name: Commit updated manifest
+      run: |
+        git config --global user.email "suchithraee1999@gmail.com"
+        git config --global user.name "Suchithra05"
+        git add k8s-manifests/flask-vote.yaml
+        git commit -m "Update image tag to ${{ github.sha }}"
+        git push
