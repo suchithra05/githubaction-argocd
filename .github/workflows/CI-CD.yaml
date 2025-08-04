@@ -38,7 +38,7 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ github.sha }}
           format: table
-          exit-code: 0  # Fails pipeline if vulnerabilities found
+          exit-code: 0  
           severity: CRITICAL,HIGH
 
       - name: Push Docker Image
