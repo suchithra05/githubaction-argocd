@@ -83,7 +83,7 @@ jobs:
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          repository: suchithra05/vote-app-manifests
+          repository: suchithra05/voteapp-manifests
           event-type: deploy-trigger
           client-payload: |
             {
