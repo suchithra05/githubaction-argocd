@@ -1,4 +1,4 @@
-name: CI - Build, Scan, Push, and Trigger CD
+name: CI - Build, Scan, Push and Trigger CD
 
 on:
   push:
@@ -16,7 +16,7 @@ permissions:
 
 jobs:
   build:
-    name: 🏗️ Build & Push to Artifactory
+    name: Build & Push to Artifactory
     runs-on: ubuntu-latest
 
     steps:
@@ -36,7 +36,7 @@ jobs:
           docker push $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
   scan:
-    name: 🔍 Pull & Scan from Artifactory
+    name: Pull & Scan from Artifactory
     runs-on: ubuntu-latest
     needs: build
 
@@ -57,7 +57,7 @@ jobs:
           severity: CRITICAL,HIGH
 
   push-and-trigger:
-    name: 🐳 Push to Docker Hub & Trigger CD
+    name: Push to Docker Hub & Trigger CD
     runs-on: ubuntu-latest
     needs: scan
 
@@ -83,7 +83,7 @@ jobs:
         run: |
           docker push $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
 
-      - name: 🚀 Trigger CD Workflow
+      - name: Trigger CD Workflow
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
