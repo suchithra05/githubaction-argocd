@@ -14,7 +14,7 @@ permissions:
 
 env:
   IMAGE_NAME: vote-app
-  IMAGE_TAG: ${{ github.sha }}
+  IMAGE_TAG: ${{ github.event.pull_request.head_sha || github.sha }}
   ARTIFACTORY_REGISTRY: trial1e0fhi.jfrog.io/docker-local
 
 jobs:
