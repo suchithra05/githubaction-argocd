@@ -29,6 +29,9 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Debug SHA
+        run: echo "Image Tag Used ${{ github.sha }}"
+
       - name: Log in to Artifactory
         run: |
           echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u ${{ secrets.ARTIFACTORY_USERNAME }} --password-stdin
