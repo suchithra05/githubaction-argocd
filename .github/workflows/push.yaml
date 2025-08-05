@@ -1,32 +1,37 @@
-name: CD - Push to Docker Hub & Trigger ArgoCD pipeline
+name: CD Trigger - Push to Docker Hub & Trigger CD
 
 on:
   workflow_run:
-    workflows: ["CI - Build, Scan."]
+    workflows: ["CI - Build, Scan"]  # must match name: in ci.yaml
     types:
       - completed
 
-jobs:
-  deploy:
-    name: Deploy After Merge
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev' }}
-    runs-on: ubuntu-latest
+permissions:
+  contents: read
 
-    env:
-      IMAGE_NAME: vote-app
-      IMAGE_TAG: ${{ github.sha }}
-      ARTIFACTORY_REGISTRY: trial1e0fhi.jfrog.io/docker-local
-      DOCKERHUB_REGISTRY: docker.io
+env:
+  IMAGE_NAME: vote-app
+  IMAGE_TAG: ${{ github.sha }}
+  ARTIFACTORY_REGISTRY: trial1e0fhi.jfrog.io/docker-local
+  DOCKERHUB_REGISTRY: docker.io
+
+jobs:
+  push-and-trigger:
+    name: 🚀 Push to Docker Hub & Trigger CD
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/dev' }}
 
     steps:
       - name: Log in to Artifactory
-        run: echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u ${{ secrets.ARTIFACTORY_USERNAME }} --password-stdin
+        run: |
+          echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u ${{ secrets.ARTIFACTORY_USERNAME }} --password-stdin
 
-      - name: Pull image
+      - name: Pull image from Artifactory
         run: docker pull $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
-      - name: Tag image for Docker Hub
-        run: docker tag $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
+      - name: Tag for Docker Hub
+        run: |
+          docker tag $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -35,9 +40,10 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Push to Docker Hub
-        run: docker push $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
+        run: |
+          docker push $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
 
-      - name: Trigger ArgoCD CD Workflow
+      - name: Trigger CD Workflow
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
