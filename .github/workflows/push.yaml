@@ -5,6 +5,7 @@ on:
     workflows: ["CI - Build, Scan"]  # must match name: in ci.yaml
     types:
       - completed
+  workflow_dispatch:
 
 permissions:
   contents: read
