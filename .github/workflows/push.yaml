@@ -20,7 +20,7 @@ jobs:
   push-and-trigger:
     name: 🚀 Push to Docker Hub & Trigger CD
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'dev' }}
 
     steps:
       - name: Log in to Artifactory
