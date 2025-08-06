@@ -29,9 +29,10 @@ jobs:
         run: |
           echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u "${{ secrets.ARTIFACTORY_USERNAME }}" --password-stdin
 
+
       - name: Build Docker Image
         run: |
-          docker build -t $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG ./apps
+          docker build -t $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG .
 
       - name: Save image tag for next jobs
         run: echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
@@ -45,7 +46,8 @@ jobs:
       - name: Log in to Artifactory
         run: |
           echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u "${{ secrets.ARTIFACTORY_USERNAME }}" --password-stdin
-          
+
+
       - name: Pull image
         run: docker pull $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
@@ -65,7 +67,8 @@ jobs:
     steps:
       - name: Log in to Artifactory
         run: |
-          echo "${{ secrets.JFROG_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u ${{ secrets.JFROG_USERNAME }} --password-stdin
+          echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u "${{ secrets.ARTIFACTORY_USERNAME }}" --password-stdin
+
 
       - name: Pull Image
         run: docker pull $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
