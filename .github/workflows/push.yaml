@@ -26,4 +26,5 @@ jobs:
           client-payload: |
             {
               "image_tag": "${{ github.sha }}"
+              "target_branch": "dev"
             }
