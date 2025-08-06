@@ -46,7 +46,7 @@ jobs:
         run: |
           echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u "${{ secrets.ARTIFACTORY_USERNAME }}" --password-stdin
           
-      - name: Pull image from Artifactory
+      - name: Pull image 
         run: docker pull $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
       - name: Scan with Trivy
