@@ -109,6 +109,6 @@ jobs:
           event-type: deploy-trigger
           client-payload: |
             {
-              "image_tag": "${{ env.IMAGE_TAG }}"
+              "image_tag": "${{ env.IMAGE_TAG }}",
               "branch": "${{ github.ref_name }}"
             }
