@@ -6,6 +6,10 @@ on:
     branches:
       - dev
 
+permissions:
+  contents: read
+  actions: write
+
 jobs:
   trigger-cd:
     if: github.event.pull_request.merged == true
@@ -23,4 +27,3 @@ jobs:
             {
               "image_tag": "${{ github.sha }}"
             }
-
