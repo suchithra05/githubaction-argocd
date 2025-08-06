@@ -110,5 +110,5 @@ jobs:
           client-payload: |
             {
               "image_tag": "${{ env.IMAGE_TAG }}",
-              "branch": "${{ github.ref_name }}"
+              "branch": "dev"
             }
