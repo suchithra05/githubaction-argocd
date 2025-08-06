@@ -1,25 +1,23 @@
-name: CI - Build, Scan
+name: CI - Build, Scan, Push and Trigger CD
 
 on:
   pull_request:
     branches:
       - dev
-    types:
-      - opened
-      - synchronize
-      - reopened
-
-permissions:
-  contents: read
+    types: [opened, synchronize, reopened]
 
 env:
   IMAGE_NAME: vote-app
   IMAGE_TAG: ${{ github.sha }}
   ARTIFACTORY_REGISTRY: trial1e0fhi.jfrog.io/docker-local
+  DOCKERHUB_REGISTRY: docker.io
+
+permissions:
+  contents: write
 
 jobs:
   build:
-    name: 🏗️ Build & Push to Artifactory
+    name: Build & Push to Artifactory
     runs-on: ubuntu-latest
 
     steps:
@@ -28,9 +26,6 @@ jobs:
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-
-      - name: Debug SHA
-        run: echo "Image Tag Used ${{ github.sha }}"
 
       - name: Log in to Artifactory
         run: |
@@ -42,7 +37,7 @@ jobs:
           docker push $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
 
   scan:
-    name: 🔍 Pull & Scan from Artifactory
+    name: Pull & Scan from Artifactory
     runs-on: ubuntu-latest
     needs: build
 
@@ -61,3 +56,30 @@ jobs:
           format: table
           exit-code: 0
           severity: CRITICAL,HIGH
+
+  push-and-trigger:
+    name: Push to Docker Hub & Trigger CD
+    runs-on: ubuntu-latest
+    needs: scan
+
+    steps:
+      - name: Log in to Artifactory
+        run: |
+          echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u ${{ secrets.ARTIFACTORY_USERNAME }} --password-stdin
+
+      - name: Pull image
+        run: docker pull $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG
+
+      - name: Tag for Docker Hub
+        run: |
+          docker tag $ARTIFACTORY_REGISTRY/$IMAGE_NAME:$IMAGE_TAG $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Push to Docker Hub
+        run: |
+          docker push $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
