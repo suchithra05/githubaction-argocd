@@ -97,10 +97,10 @@ jobs:
     needs: push
 
     steps:
-      - name: Trigger CD pipeline
+      - name: Trigger CD workflow in vote-app-manifests repo
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.CD_REPO_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: suchithra05/vote-app-manifests
           event-type: deploy-trigger
           client-payload: |
