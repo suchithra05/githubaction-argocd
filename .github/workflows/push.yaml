@@ -25,6 +25,6 @@ jobs:
           event-type: deploy-trigger
           client-payload: |
             {
-              "image_tag": "${{ github.sha }}"
+              "image_tag": "${{ github.sha }}",
               "target_branch": "dev"
             }
