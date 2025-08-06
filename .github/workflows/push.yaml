@@ -23,7 +23,8 @@ jobs:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           repository: suchithra05/voteapp-manifests
           event-type: deploy-trigger
-          client-payload: '{
+          client-payload: |
+             {
               "image_tag": "${{ github.sha }}",
               "target_branch": "dev"
-          }'
+             }
