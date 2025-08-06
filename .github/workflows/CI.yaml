@@ -43,8 +43,8 @@ jobs:
 
     steps:
       - name: Log in to Artifactory
-        run: |
-         echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login $ARTIFACTORY_REGISTRY -u "${{ secrets.ARTIFACTORY_USERNAME }}" --password-stdin
+        run: echo "${{ secrets.ARTIFACTORY_PASSWORD }}" | docker login ${{ env.ARTIFACTORY_REGISTRY }} -u ${{ secrets.ARTIFACTORY_USERNAME }} --password-stdin
+         
 
 
       - name: Pull image from Artifactory
