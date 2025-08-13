@@ -62,7 +62,7 @@ jobs:
       - name: Scan with Trivy
         uses: aquasecurity/trivy-action@0.11.2
         with:
-          image-ref: $DOCKERHUB_REGISTRY/${{ secrets.DOCKER_USERNAME }}/$IMAGE_NAME:$IMAGE_TAG
+          image-ref: docker.io/${{ secrets.DOCKER_USERNAME }}/vote-app:${{ env.IMAGE_TAG }}
           format: table
           exit-code: 0
           severity: CRITICAL,HIGH
